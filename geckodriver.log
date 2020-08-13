@@ -1,0 +1,26 @@
+1597361487054	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofile1t7IQl"
+*** You are running in headless mode.
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1597361498613	Marionette	INFO	Listening on port 52889
+1597361498911	Marionette	WARN	TLS certificate errors will be ignored for this session
+1597361531858	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofilehyqw5Q"
+*** You are running in headless mode.
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1597361541306	Marionette	INFO	Listening on port 52935
+1597361541408	Marionette	WARN	TLS certificate errors will be ignored for this session
+1597361559532	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofile9yRFp6"
+*** You are running in headless mode.
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1597361571227	Marionette	INFO	Listening on port 52997
+1597361572032	Marionette	WARN	TLS certificate errors will be ignored for this session
+1597361625891	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofileBMFAE3"
+*** You are running in headless mode.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1597361635986	Marionette	INFO	Listening on port 53121
+1597361636341	Marionette	WARN	TLS certificate errors will be ignored for this session
+1597361651206	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofilePx7Sig"
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1597361660484	Marionette	INFO	Listening on port 53205
+1597361660671	Marionette	WARN	TLS certificate errors will be ignored for this session
+1597361672692	Marionette	INFO	Stopped listening on port 53205
