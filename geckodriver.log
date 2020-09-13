@@ -662,3 +662,29 @@ console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Err
 1599433265701	Marionette	WARN	TLS certificate errors will be ignored for this session
 JavaScript error: resource://gre/actors/AutoCompleteChild.jsm, line 208: Error: Invalid autocomplete selectedIndex
 1599433349089	Marionette	INFO	Stopped listening on port 52767
+1600012687899	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofileMjJ08d"
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1600012701640	Marionette	INFO	Listening on port 50822
+1600012702026	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: resource://gre/actors/AutoCompleteChild.jsm, line 208: Error: Invalid autocomplete selectedIndex
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+1600013907052	Marionette	INFO	Stopped listening on port 50822
+ram Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofile1H4g01"
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1600013916913	Marionette	INFO	Listening on port 51073
+1600013917249	Marionette	WARN	TLS certificate errors will be ignored for this session
+1600014022389	Marionette	INFO	Stopped listening on port 51073
+1600014027703	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofileO96bYP"
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1600014043241	Marionette	INFO	Listening on port 51124
+1600014043451	Marionette	WARN	TLS certificate errors will be ignored for this session
+1600014232085	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofilePdEDrJ"
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1600014248824	Marionette	INFO	Listening on port 51180
+1600014248899	Marionette	WARN	TLS certificate errors will be ignored for this session
+1600014346458	Marionette	INFO	Stopped listening on port 51180
+ram Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-safe-mode" "-foreground" "-no-remote" "-profile" "C:\\Users\\Aruns\\AppData\\Local\\Temp\\rust_mozprofileF4ISxu"
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1600014305703	Marionette	INFO	Listening on port 51232
+1600014305758	Marionette	WARN	TLS certificate errors will be ignored for this session
+1600014348272	Marionette	INFO	Stopped listening on port 51232
