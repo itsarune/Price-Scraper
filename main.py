@@ -29,21 +29,34 @@ def extract_info(elements, vendor, price, link) :
     return products
 
 
-def extract_seller_data(driver, seller_config) :
-    master_product_list = list()
-    driver.get(seller_config["homepage"])
-    return
+def extract_seller_data(driver, config, seller_config) :
+    try :
+        master_product_list = list()
+        driver.get(config[seller_config]["homepage"])
+        search(driver, search_item, config[seller_config]["search_xpath"])
+        products = extract_info(
+            find_products(driver, config[seller_config]["product_xpath"]),
+            config[seller_config]["vendor_field"],
+            config[seller_config]["price_field"],
+            config[seller_config]["link_field"])
+        return products
+    except :
+        print("Error with " + seller_config + ". Skipping...")
+        return list()
 
 search_item = "9782014015973"
 
-options = webdriver.FirefoxOptions()
+# options = webdriver.Safari()
 # options.add_argument("-headless")
-options.add_argument("-safe-mode")
 
-browser = webdriver.Firefox(options=options)
+browser = webdriver.Safari()
 config = configparser.ConfigParser()
 config.read('config.ini')
-extract_seller_data(browser, config.sections()[0])
+
+p1 = extract_seller_data(browser, config, config.sections()[0])
+p2 = extract_seller_data(browser, config, config.sections()[1])
+
+browser.quit()
 #browser.get("http://www.bookscouter.com/buy")
 
 #search(browser, search_item, "//input[@class='input--text input--search']")

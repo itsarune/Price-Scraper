@@ -1,1 +1,3 @@
-"# Price-Scraper" 
+"# Price-Scraper"
+
+Uses Selenium to scrape website data
