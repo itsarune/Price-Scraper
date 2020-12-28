@@ -40,8 +40,9 @@ def extract_seller_data(driver, config, seller_config) :
             config[seller_config]["price_field"],
             config[seller_config]["link_field"])
         return products
-    except :
+    except Exception as e:
         print("Error with " + seller_config + ". Skipping...")
+        print(str(e) + "\n");
         return list()
 
 search_item = "9782014015973"
@@ -55,6 +56,7 @@ config.read('config.ini')
 
 p1 = extract_seller_data(browser, config, config.sections()[0])
 p2 = extract_seller_data(browser, config, config.sections()[1])
+p3 = extract_seller_data(browser, config, config.sections()[2])
 
 browser.quit()
 #browser.get("http://www.bookscouter.com/buy")
