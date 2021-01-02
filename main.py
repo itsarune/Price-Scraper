@@ -4,6 +4,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import configparser
+import selenium.common.exceptions
+import traceback
 
 def search(driver, search_text, search_xpath) :
     search_bar = WebDriverWait(driver, 10).until(
@@ -24,26 +26,45 @@ def extract_info(elements, vendor, price, link) :
     for e in elements:
         products.append(
             (e.get_attribute(vendor), e.get_attribute(price),
-             e.get_attribute(link))
-        )
+             e.get_attribute(link)))
     return products
 
+def extract_by_attribute(elements, vendor, price, link) :
+    return
 
+def extract_by_xpath(elements, vendor, price, link) :
+    return
+
+def force_search(driver, search_icon_xpath):
+    search = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, search_icon_xpath)))
+    search.click()
+    return
+
+    
 def extract_seller_data(driver, config, seller_config) :
-    try :
+    try:
         master_product_list = list()
         driver.get(config[seller_config]["homepage"])
         search(driver, search_item, config[seller_config]["search_xpath"])
+        try :
+            all_product_data = find_products(driver, config[seller_config]["product_xpath"])
+        except selenium.common.exceptions.TimeoutException :
+            force_search(driver, config[seller_config]["search_icon"])
+            all_product_data = find_products(driver, config[seller_config]["product_xpath"])
         products = extract_info(
-            find_products(driver, config[seller_config]["product_xpath"]),
+            all_product_data,
             config[seller_config]["vendor_field"],
             config[seller_config]["price_field"],
             config[seller_config]["link_field"])
         return products
+    except selenium.common.exceptions.TimeoutException :
+        print("No books found in " + seller_config)
     except Exception as e:
-        print("Error with " + seller_config + ". Skipping...")
-        print(str(e) + "\n");
-        return list()
+        print("Error with " + seller_config + ". Skipping... Printing stack " +
+              "trace: ")
+        print(traceback.format_exc())
+    return list()
 
 search_item = "9782014015973"
 
@@ -57,6 +78,11 @@ config.read('config.ini')
 p1 = extract_seller_data(browser, config, config.sections()[0])
 p2 = extract_seller_data(browser, config, config.sections()[1])
 p3 = extract_seller_data(browser, config, config.sections()[2])
+
+print(p3)
+
+print("Press enter to end program")
+input()
 
 browser.quit()
 #browser.get("http://www.bookscouter.com/buy")
