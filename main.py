@@ -21,19 +21,36 @@ def find_products(driver, element_xpath) :
         EC.presence_of_all_elements_located((By.XPATH, element_xpath)))
 
 
-def extract_info(elements, vendor, price, link) :
-    products = list()
-    for e in elements:
-        products.append(
-            (e.get_attribute(vendor), e.get_attribute(price),
-             e.get_attribute(link)))
-    return products
+def extract_info(driver, elements, vendor, price, link) :
+    if ((elements[0].get_attribute(vendor) is None) or
+        (elements[0].get_attribute(price) is None) or
+        (elements[0].get_attribute(link) is None)) :
+         return extract_by_xpath(driver, elements, vendor, price, link)
+    else :
+         return extract_by_attribute(elements, vendor, price, link)
 
 def extract_by_attribute(elements, vendor, price, link) :
-    return
+    products = list()
+    for e in elements :
+        products.append((e.get_attribute(vendor),
+                         e.get_attribute(price),
+                         e.get_attribute(link)))
+    return products
 
-def extract_by_xpath(elements, vendor, price, link) :
-    return
+def extract_by_xpath(driver, elements, vendor, price, link) :
+    products = list()
+    vendors = WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, vendor)))
+    print(vendors)
+    prices = WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, price)))
+    links = WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, link)))
+    for i in range (0, len(elements)) :
+        products.append(vendors[i].text,
+                        prices[i].text,
+                        links[i].text)
+    return products
 
 def force_search(driver, search_icon_xpath):
     search = WebDriverWait(driver, 10).until(
@@ -53,6 +70,7 @@ def extract_seller_data(driver, config, seller_config) :
             force_search(driver, config[seller_config]["search_icon"])
             all_product_data = find_products(driver, config[seller_config]["product_xpath"])
         products = extract_info(
+            driver,
             all_product_data,
             config[seller_config]["vendor_field"],
             config[seller_config]["price_field"],
