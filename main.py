@@ -7,6 +7,12 @@ import configparser
 import selenium.common.exceptions
 import traceback
 
+#   Searches the search term on the website
+#
+# @param WebDriver  : webdriver to search elements
+# @param String     : search term
+# @param String     : search bar xpath
+
 def search(driver, search_text, search_xpath) :
     search_bar = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, search_xpath)))
@@ -15,20 +21,54 @@ def search(driver, search_text, search_xpath) :
     search_bar.send_keys(Keys.RETURN)
     return
 
-
+# Find the products on the website using find_element_by_xpath
+#
+# @param WebDriver  : WebDriver to complete the search
+# @param XPATH      : xpath for the book products
+#
+# @return the elements found
 def find_products(driver, element_xpath) :
     return WebDriverWait(driver, 10).until(
         EC.presence_of_all_elements_located((By.XPATH, element_xpath)))
 
 
-def extract_info(driver, elements, vendor, price, link) :
-    if ((elements[0].get_attribute(vendor) is None) or
-        (elements[0].get_attribute(price) is None) or
-        (elements[0].get_attribute(link) is None)) :
-         return extract_by_xpath(driver, elements, vendor, price, link)
-    else :
-         return extract_by_attribute(elements, vendor, price, link)
+# Extracts information from the website based on either the property for the
+# product element or directly by xpath
+#
+# @param Webdriver      : driver to complete the search
+# @param List<Elements> : list of elements on the webpage
+# @param config         : book config
+#
+# @return returns a list of products with each product returned as
+#   list(vendor, price, link)
+def extract_info(driver, elements, config) :
+    products = list();
+    for i in range(0, len(elements)) :
+        if (config["vendor_field?"] == "true") :
+            vendor = elements[i].get_attribute(config["vendor_field"])
+        else :
+            vendor = extract_by_xpath(driver, config["vendor_field"], i)
+        if (config["price_field?"] == "true") :
+            price = elements[i].get_attribute(config["price_field"])
+        else :
+            price = extract_by_xpath(driver, config["price_field"], i)
+        if (config["link_field?"] == "true") :
+            link = elements[i].get_attribute(config["link_field"])
+        else :
+            link = extract_by_xpath(driver, config["link_field"], i)
+        product = [vendor, price, link]
+        products.append(product)
+    return products
+    # if ((elements[0].get_attribute(vendor) is None) or
+    #     (elements[0].get_attribute(price) is None) or
+    #     (elements[0].get_attribute(link) is None)) :
+    #      return extract_by_xpath(driver, elements, vendor, price, link)
+    # else :
+    #      return extract_by_attribute(elements, vendor, price, link)
 
+#
+
+# @deprecated probably
 def extract_by_attribute(elements, vendor, price, link) :
     products = list()
     for e in elements :
@@ -37,20 +77,29 @@ def extract_by_attribute(elements, vendor, price, link) :
                          e.get_attribute(link)))
     return products
 
-def extract_by_xpath(driver, elements, vendor, price, link) :
-    products = list()
-    vendors = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.XPATH, vendor)))
-    print(vendors)
-    prices = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.XPATH, price)))
-    links = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.XPATH, link)))
-    for i in range (0, len(elements)) :
-        products.append(vendors[i].text,
-                        prices[i].text,
-                        links[i].text)
-    return products
+# Extract the field information directly by xpath
+#
+# @param Webdriver : driver where the search was completed
+# @param xpath     : xpath element to search for
+# @param index     : which element on the list of elements on the webpage that
+#                       should be taken
+def extract_by_xpath(driver, element_to_look_for, index) :
+    elements = WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.XPATH, element_to_look_for)))
+    return elements[index].text
+    # products = list()
+    # vendors = WebDriverWait(driver, 10).until(
+    #         EC.presence_of_all_elements_located((By.XPATH, vendor)))
+    # print(vendors)
+    # prices = WebDriverWait(driver, 10).until(
+    #         EC.presence_of_all_elements_located((By.XPATH, price)))
+    # links = WebDriverWait(driver, 10).until(
+    #         EC.presence_of_all_elements_located((By.XPATH, link)))
+    # for i in range (0, len(elements)) :
+    #     products.append((vendors[i].text,
+    #                     prices[i].text,
+    #                     links[i].text))
+    # return products
 
 def force_search(driver, search_icon_xpath):
     search = WebDriverWait(driver, 10).until(
@@ -58,7 +107,7 @@ def force_search(driver, search_icon_xpath):
     search.click()
     return
 
-    
+
 def extract_seller_data(driver, config, seller_config) :
     try:
         master_product_list = list()
@@ -72,9 +121,7 @@ def extract_seller_data(driver, config, seller_config) :
         products = extract_info(
             driver,
             all_product_data,
-            config[seller_config]["vendor_field"],
-            config[seller_config]["price_field"],
-            config[seller_config]["link_field"])
+            config[seller_config])
         return products
     except selenium.common.exceptions.TimeoutException :
         print("No books found in " + seller_config)
@@ -93,11 +140,13 @@ browser = webdriver.Safari()
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+for seller_config in config.sections() :
+    products_in_seller = extract_seller_data(browser, config, seller_config)
+
+
 p1 = extract_seller_data(browser, config, config.sections()[0])
 p2 = extract_seller_data(browser, config, config.sections()[1])
 p3 = extract_seller_data(browser, config, config.sections()[2])
-
-print(p3)
 
 print("Press enter to end program")
 input()
@@ -128,4 +177,3 @@ browser.quit()
 #    print(products)
 #except :
 #    print("ERROR! No element found.")
-
