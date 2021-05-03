@@ -44,20 +44,30 @@ def find_products(driver, element_xpath) :
 def extract_info(driver, elements, config) :
     products = list();
     for i in range(0, len(elements)) :
-        if (config["vendor_field?"] == "true") :
-            vendor = elements[i].get_attribute(config["vendor_field"])
-        else :
-            vendor = extract_by_xpath(driver, config["vendor_field"], i)
-        if (config["price_field?"] == "true") :
-            price = elements[i].get_attribute(config["price_field"])
-        else :
-            price = extract_by_xpath(driver, config["price_field"], i)
-        if (config["link_field?"] == "true") :
-            link = elements[i].get_attribute(config["link_field"])
-        else :
-            link = extract_by_xpath(driver, config["link_field"], i)
-        product = [vendor, price, link]
-        products.append(product)
+        try :
+            product = list()
+            for field in range(0, len(fields)) :
+                if (config[fields[field] + "?"] == "true") :
+                    product.append(elements[field].get_attribute(config[fields[field]]))
+                else :
+                    product.append(extract_by_xpath(driver, config[fields[field]]))
+            products.append(product)
+        except selenium.common.exceptions.NoSuchElementException :
+            pass
+        # if (config["vendor_field?"] == "true") :
+        #     vendor = elements[i].get_attribute(config["vendor_field"])
+        # else :
+        #     vendor = extract_by_xpath(driver, config["vendor_field"], i)
+        # if (config["price_field?"] == "true") :
+        #     price = elements[i].get_attribute(config["price_field"])
+        # else :
+        #     price = extract_by_xpath(driver, config["price_field"], i)
+        # if (config["link_field?"] == "true") :
+        #     link = elements[i].get_attribute(config["link_field"])
+        # else :
+        #     link = extract_by_xpath(driver, config["link_field"], i)
+        # product = [vendor, price, link]
+        # products.append(product)
     return products
     # if ((elements[0].get_attribute(vendor) is None) or
     #     (elements[0].get_attribute(price) is None) or
@@ -86,6 +96,7 @@ def extract_by_attribute(elements, vendor, price, link) :
 def extract_by_xpath(driver, element_to_look_for, index) :
     elements = WebDriverWait(driver, 10).until(
         EC.presence_of_all_elements_located((By.XPATH, element_to_look_for)))
+    # print("extract_by_xpath DEBUG: " + elements[index] + '\n')
     return elements[index].text
     # products = list()
     # vendors = WebDriverWait(driver, 10).until(
@@ -132,6 +143,7 @@ def extract_seller_data(driver, config, seller_config) :
     return list()
 
 search_item = "9782014015973"
+fields = ["vendor_field", "price_field", "link_field"]
 
 # options = webdriver.Safari()
 # options.add_argument("-headless")
@@ -140,14 +152,12 @@ browser = webdriver.Safari()
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+all_products = list()
 for seller_config in config.sections() :
     products_in_seller = extract_seller_data(browser, config, seller_config)
+    all_products = all_products + products_in_seller
 
-
-p1 = extract_seller_data(browser, config, config.sections()[0])
-p2 = extract_seller_data(browser, config, config.sections()[1])
-p3 = extract_seller_data(browser, config, config.sections()[2])
-
+print(all_products)
 print("Press enter to end program")
 input()
 
