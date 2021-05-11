@@ -29,7 +29,7 @@ def search(driver, search_text, search_xpath) :
 # @return the elements found
 def find_products(driver, element_xpath) :
     return WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.XPATH, element_xpath)))
+        EC.visibility_of_all_elements_located((By.XPATH, element_xpath)))
 
 
 # Extracts information from the website based on either the property for the
@@ -50,9 +50,9 @@ def extract_info(driver, elements, config) :
                 if (config[fields[field] + "?"] == "true") :
                     product.append(elements[field].get_attribute(config[fields[field]]))
                 else :
-                    product.append(extract_by_xpath(driver, config[fields[field]]))
+                    product.append(extract_by_xpath(driver, config[fields[field]], i))
             products.append(product)
-        except selenium.common.exceptions.NoSuchElementException :
+        except Exception :
             pass
         # if (config["vendor_field?"] == "true") :
         #     vendor = elements[i].get_attribute(config["vendor_field"])
@@ -99,7 +99,7 @@ def extract_by_xpath(driver, element_to_look_for, index) :
     # print("extract_by_xpath DEBUG: " + elements[index] + '\n')
     return elements[index].text
     # products = list()
-    # vendors = WebDriverWait(driver, 10).until(
+    # vendors = WebDriverWait(driver, 10).untli(
     #         EC.presence_of_all_elements_located((By.XPATH, vendor)))
     # print(vendors)
     # prices = WebDriverWait(driver, 10).until(
@@ -142,6 +142,37 @@ def extract_seller_data(driver, config, seller_config) :
         print(traceback.format_exc())
     return list()
 
+
+def pricify(price_text) :
+    try :
+        return int(price_text)
+    except Exception :
+        try :
+            price = str()
+            if (price_text[0] == '$') :
+                index = 1;
+            else :
+                index = 0;
+            while (price_text[index] != '.') :
+                price.join(price_text[index])
+                index += 1
+            price[index] = "."
+            index += 1
+            for i in range(1, 2) :
+                price.join(price_text[index])
+                index += 1;
+        except IndexError :
+            pass
+        if price == '' :
+            return 0
+        return int(price)
+
+def clean_up_data(product_data) :
+    for i in range(0, len(product_data)) :
+        price = pricify(product_data[i][1])
+        product_data[i][1] = price
+    return product_data
+
 search_item = "9782014015973"
 fields = ["vendor_field", "price_field", "link_field"]
 
@@ -157,11 +188,14 @@ for seller_config in config.sections() :
     products_in_seller = extract_seller_data(browser, config, seller_config)
     all_products = all_products + products_in_seller
 
-print(all_products)
 print("Press enter to end program")
 input()
 
 browser.quit()
+
+clean_up_data(all_products)
+print(all_products)
+
 #browser.get("http://www.bookscouter.com/buy")
 
 #search(browser, search_item, "//input[@class='input--text input--search']")
