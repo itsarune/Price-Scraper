@@ -1,6 +1,11 @@
-"# Price-Scraper"
+Textbook Price Scraper
 
 Uses Selenium to scrape website data
+
+# User stories:
+    - Pass in a search term and look at search results from multiple websites (reporting source, price and a follow-up
+        link)
+    - Add more websites using a configuration file
 
 # Config Instructions
 

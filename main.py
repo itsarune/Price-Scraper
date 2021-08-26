@@ -5,9 +5,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import configparser
 import selenium.common.exceptions
-import traceback
+import traceback, logging
 
-#   Searches the search term on the website
+LOG_LEVEL = logging.DEBUG
+
+# Searches the search term on the website
 #
 # @param WebDriver  : webdriver to search elements
 # @param String     : search term
@@ -37,11 +39,14 @@ def find_products(driver, element_xpath) :
 #
 # @param Webdriver      : driver to complete the search
 # @param List<Elements> : list of elements on the webpage
-# @param config         : book config
+# @param config_name    : book config name
+# @param configuration  : configurations
 #
 # @return returns a list of products with each product returned as
 #   list(vendor, price, link)
-def extract_info(driver, elements, config) :
+def extract_info(driver, elements, config_name, configuration) :
+    config = configuration[config_name]
+    logger = logging.getLogger(config_name)
     products = list();
     for i in range(0, len(elements)) :
         try :
@@ -50,10 +55,10 @@ def extract_info(driver, elements, config) :
                 if (config[fields[field] + "?"] == "true") :
                     product.append(elements[field].get_attribute(config[fields[field]]))
                 else :
-                    product.append(extract_by_xpath(driver, config[fields[field]], i))
+                    product.append(extract_by_xpath(config_name, driver, config[fields[field]], i))
             products.append(product)
-        except Exception :
-            pass
+        except Exception as ex:
+            logger.debug("extract_info: exception encountered: " + traceback.format_exc())
         # if (config["vendor_field?"] == "true") :
         #     vendor = elements[i].get_attribute(config["vendor_field"])
         # else :
@@ -93,7 +98,9 @@ def extract_by_attribute(elements, vendor, price, link) :
 # @param xpath     : xpath element to search for
 # @param index     : which element on the list of elements on the webpage that
 #                       should be taken
-def extract_by_xpath(driver, element_to_look_for, index) :
+def extract_by_xpath(config_name, driver, element_to_look_for, index) :
+    logging.getLogger(config_name).debug("extract_by_xpath: xpath: " + str(element_to_look_for) + ", at index: " 
+                                         + str(index))
     elements = WebDriverWait(driver, 10).until(
         EC.presence_of_all_elements_located((By.XPATH, element_to_look_for)))
     # print("extract_by_xpath DEBUG: " + elements[index] + '\n')
@@ -120,6 +127,7 @@ def force_search(driver, search_icon_xpath):
 
 
 def extract_seller_data(driver, config, seller_config) :
+    logger = logging.getLogger(seller_config)
     try:
         master_product_list = list()
         driver.get(config[seller_config]["homepage"])
@@ -127,12 +135,14 @@ def extract_seller_data(driver, config, seller_config) :
         try :
             all_product_data = find_products(driver, config[seller_config]["product_xpath"])
         except selenium.common.exceptions.TimeoutException :
+            logger.debug("Normal search failed, trying with search icon")
             force_search(driver, config[seller_config]["search_icon"])
             all_product_data = find_products(driver, config[seller_config]["product_xpath"])
         products = extract_info(
             driver,
             all_product_data,
-            config[seller_config])
+            seller_config,
+            config)
         return products
     except selenium.common.exceptions.TimeoutException :
         print("No books found in " + seller_config)
@@ -165,7 +175,7 @@ def pricify(price_text) :
             pass
         if price == '' :
             return 0
-        return int(price)
+        return float(price)
 
 def clean_up_data(product_data) :
     for i in range(0, len(product_data)) :
@@ -173,9 +183,14 @@ def clean_up_data(product_data) :
         product_data[i][1] = price
     return product_data
 
-search_item = "9782014015973"
+logging.basicConfig()
+logger = logging.getLogger('__main__')
+logger.setLevel(LOG_LEVEL)
+
+search_item = "9781368021425"
 fields = ["vendor_field", "price_field", "link_field"]
 
+# TODO: when system is working, re-enable this so that the browser isn't opened up
 # options = webdriver.Safari()
 # options.add_argument("-headless")
 
@@ -185,7 +200,9 @@ config.read('config.ini')
 
 all_products = list()
 for seller_config in config.sections() :
+    logging.getLogger(seller_config).setLevel(LOG_LEVEL)
     products_in_seller = extract_seller_data(browser, config, seller_config)
+    logger.info("Books found in " + seller_config + ": " + str(products_in_seller))
     all_products = all_products + products_in_seller
 
 print("Press enter to end program")
@@ -195,29 +212,3 @@ browser.quit()
 
 clean_up_data(all_products)
 print(all_products)
-
-#browser.get("http://www.bookscouter.com/buy")
-
-#search(browser, search_item, "//input[@class='input--text input--search']")
-#elements = find_products(browser,
-#                         "//a[@class='link--buy link--buy--buy btn action']")
-#product_info = extract_info(elements, "data-vendor", "data-price", "href")
-# search_key = browser.find_element_by_xpath("//button[@class='btn btn--accent search__btn']")
-# search_key.click()
-
-#print(product_info)
-
-#try :
-#    elements = WebDriverWait(browser, 10).until(
-#        EC.presence_of_all_elements_located((By.XPATH, "//a[@class='link--buy link--buy--buy btn action']")))
-
-#    products = list()
-
-#    for e in elements:
-#        products.append(
-#            (e.get_attribute("data-vendor"), e.get_attribute("data-price"), e.get_attribute("href"))
-#        )
-#    print(elements)
-#    print(products)
-#except :
-#    print("ERROR! No element found.")
