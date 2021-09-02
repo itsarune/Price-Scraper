@@ -52,10 +52,10 @@ def extract_info(driver, elements, config_name, configuration) :
         try :
             product = list()
             for field in range(0, len(fields)) :
-                if (config[fields[field] + "?"] == "true") :
-                    product.append(elements[field].get_attribute(config[fields[field]]))
+                if (config[fields[field] + "_field?"] == "true") :
+                    product.append(elements[i].get_attribute(config[fields[field] + "_field"]))
                 else :
-                    product.append(extract_by_xpath(config_name, driver, config[fields[field]], i))
+                    product.append(extract_by_xpath(configuration, config_name, driver, fields[field], i))
             products.append(product)
         except Exception as ex:
             logger.debug("extract_info: exception encountered: " + traceback.format_exc())
@@ -81,8 +81,6 @@ def extract_info(driver, elements, config_name, configuration) :
     # else :
     #      return extract_by_attribute(elements, vendor, price, link)
 
-#
-
 # @deprecated probably
 def extract_by_attribute(elements, vendor, price, link) :
     products = list()
@@ -98,13 +96,19 @@ def extract_by_attribute(elements, vendor, price, link) :
 # @param xpath     : xpath element to search for
 # @param index     : which element on the list of elements on the webpage that
 #                       should be taken
-def extract_by_xpath(config_name, driver, element_to_look_for, index) :
-    logging.getLogger(config_name).debug("extract_by_xpath: xpath: " + str(element_to_look_for) + ", at index: " 
+def extract_by_xpath(configuration, config_name, driver, element_to_look_for, index) :
+    config = configuration[config_name]
+    logging.getLogger(config_name).debug("extract_by_xpath: element: " + str(element_to_look_for) + ", at index: " 
                                          + str(index))
     elements = WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.XPATH, element_to_look_for)))
+        EC.presence_of_all_elements_located((By.XPATH, config[element_to_look_for + "_xpath"])))
+    logging.getLogger(config_name).debug("extract_by_xpath: number of elements found = " + str(len(elements)))
     # print("extract_by_xpath DEBUG: " + elements[index] + '\n')
-    return elements[index].text
+    val = elements[index].get_attribute(config[element_to_look_for + "_field"])
+    if val is None :
+        return elements[index].text
+    else :
+        return val
     # products = list()
     # vendors = WebDriverWait(driver, 10).untli(
     #         EC.presence_of_all_elements_located((By.XPATH, vendor)))
@@ -155,7 +159,7 @@ def extract_seller_data(driver, config, seller_config) :
 
 def pricify(price_text) :
     try :
-        return int(price_text)
+        return float(price_text)
     except Exception :
         try :
             price = str()
@@ -188,7 +192,7 @@ logger = logging.getLogger('__main__')
 logger.setLevel(LOG_LEVEL)
 
 search_item = "9781368021425"
-fields = ["vendor_field", "price_field", "link_field"]
+fields = ["vendor", "price", "link"]
 
 # TODO: when system is working, re-enable this so that the browser isn't opened up
 # options = webdriver.Safari()
