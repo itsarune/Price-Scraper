@@ -7,8 +7,12 @@ import configparser
 import selenium.common.exceptions
 import traceback, logging
 import csv
+import requests
 
 LOG_LEVEL = logging.DEBUG
+DEFAULT_CURRENCY = "CAD"
+
+usd_to_cad_exchange_rate = None
 
 # Searches the search term on the website
 #
@@ -48,7 +52,8 @@ def find_products(driver, element_xpath) :
 def extract_info(driver, elements, config_name, configuration) :
 	config = configuration[config_name]
 	logger = logging.getLogger(config_name)
-	products = list();
+	logger.debug("extract_info: # of elements: " + str(len(elements)))
+	products = list()
 	for i in range(0, len(elements)) :
 		try :
 			product = list()
@@ -127,6 +132,7 @@ def extract_by_xpath(configuration, config_name, driver, element_to_look_for, in
 def force_search(driver, search_icon_xpath):
 	search = WebDriverWait(driver, 10).until(
 		EC.presence_of_element_located((By.XPATH, search_icon_xpath)))
+	logger.debug("force_search: found search button, clicking")
 	search.click()
 	return
 
@@ -160,29 +166,44 @@ def extract_seller_data(driver, config, seller_config) :
 
 def pricify(price_text) :
 	logger.debug("pricify: price_text=" + str(price_text))
+	convert_from_us = False
+	global usd_to_cad_exchange_rate
+	if (usd_to_cad_exchange_rate is None) :
+		usd_to_cad_exchange_rate = get_exchange_rate()
+		logger.info("USD to CAD exchange rate: " + str(usd_to_cad_exchange_rate))
 	try :
 		return float(price_text)
-	except Exception :
+	except ValueError :
 		index = 0
+		price = str()
 		try :
-			price = str()
 			if (price_text.find('US') != -1) :
 				index += 2
+				convert_from_us = True
 			if (price_text[index] == '$') :
-				++index
-			while (price_text[index] != '.') :
-				price.join(price_text[index])
 				index += 1
-			price.join(".")
+			while (price_text[index] == ' ') :
+				index += 1
+			while (price_text[index] != '.') :
+				price += price_text[index]
+				index += 1
+			price += "."
 			index += 1
 			for i in range(1, 2) :
-				price.join(price_text[index])
+				price += (price_text[index])
 				index += 1;
 		except IndexError :
 			pass
 		if price == '' :
 			return 0
-		return float(price)
+		if convert_from_us :
+			price *= usd_to_cad_exchange_rate
+		try :
+			return float(price)
+		except ValueError :
+			return 0
+	except TypeError :
+		return 0
 	
 def clean_up_data(product_data) :
 	for i in range(0, len(product_data)) :
@@ -196,6 +217,14 @@ def output_to_csv(products) :
 		reader.writerow(['VENDOR', 'PRICE', 'LINK'])
 		for product in products :
 			reader.writerow(product)
+			
+def get_exchange_rate(base='USD', target=DEFAULT_CURRENCY) :
+	api_uri = "https://api.fixer.io/latest?base={}&symbols={}".format(base, target)
+	api_response = requests.get(api_uri)
+	
+	if (api_response.status_code == 200) :
+		return api_response.json()["rates"][target_currency]
+	return 1
 		
 
 logging.basicConfig()
@@ -219,7 +248,7 @@ for seller_config in config.sections() :
 	products_in_seller = extract_seller_data(browser, config, seller_config)
 	logger.info("Books found in " + seller_config + ": " + str(products_in_seller))
 	if ((len(products_in_seller) >= 1) and 
-		(products_in_seller[0] != None or products_in_seller[1] == None or products_in_seller[2] == None)) :
+		(products_in_seller[0] != None)) :
 		all_products = all_products + products_in_seller
 
 print("Press enter to end program")
